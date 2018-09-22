@@ -1,0 +1,262 @@
+课题  NavigationView原理分析，ToolBar 与 SearchView详解
+ 
+ 
+ 1  完成星期五  遗留 的作业
+ 
+ 
+ 
+ 2  SnackBar关于 LENGTH_INDEFINITE 的使用  和  1500ms   275ms  1775ms毫秒之后消失  在源码中的体现
+ 
+ SnackBar   1775ms毫秒之后消失
+ 
+ durationMs=1500ms
+ 
+ 
+ mHandler.sendMessageDelayed(Message.obtain(mHandler, MSG_TIMEOUT, r), durationMs);
+ 
+ 
+ 
+ 3  NavigationView  MVP在源码中的体现    1
+ 
+ 
+ 
+ 
+ 4  ToolBar 以及 SearchView的运用        2       
+ 
+ 
+ 在MVP里，Presenter完全把Model和View进行了分离，主要的程序逻辑在Presenter里实现。
+而且，Presenter与具体的View是没有直接关联的，
+而是通过定义好的接口进行交互，从而使得在变更View时候可以保持Presenter的不变。View层显示功能，除此就不应该有更多的内容，绝不容许直接访问Model，这就是与MVC很大的不同之处。
+
+ 
+  ========================= NavigationView===========================================================
+  构造方法
+  
+    // Create the menu
+        mMenu = new NavigationMenu(context);
+
+		
+		
+  addView((View) mPresenter.getMenuView(this));
+  
+  inflateMenu（）   从  xml解析数据   到 mMenu
+  
+  解析  view_meun
+  
+  dom  解析  LayoutInflater
+  MenuInfalter  解析  xml
+  
+   getMenuInflater().inflate(resId, mMenu);
+   
+   xml 数据  加载到了  mMenu
+  
+  数据  
+ 
+  刷新apater
+  mPresenter.updateMenuView(false);
+  数据源构建过程
+  prepareMenuItems
+	 
+	 
+	 
+  填充头部视图
+    mHeaderLayout = (LinearLayout) mLayoutInflater.inflate(R.layout.design_navigation_item_header, mMenuView, true);
+头部添加到ReacyView
+全成员变量				
+ LinearLayout mHeaderLayout;
+ 
+ Adatper  
+ 数据源
+  private final ArrayList<NavigationMenuItem> mItems = new ArrayList<>();		
+
+==================================ToolBar=======================================================
+
+
+ActionBar  
+Action Bar是一种新増的导航栏功能，在android 3.0之后加入到系统的API当中，它标识了用户当前操作界面的位置，并提供了额外的用户动作、界面导航等功能。使用ActionBar的好处是，它可以给提供一种全局统一的UI界面，使得用户在使用任何一款软件时都懂得该如何操作，并且ActionBar还可以自动适应各种不同大小的屏幕。
+为了让安卓应用的界面更加统一同时降低用户的学习成本以及避免安卓用户在使用中逻辑混乱。
+事与愿违
+
+开发者支持
+
+其中，[1]是ActionBar的图标，[2]是两个action按钮，[3]是overflow按钮。
+
+谈 actionBar 问题
+坑 
+
+ 丑
+
+ showasaction
+ 
+ 用起来比较费劲  各种坑 比如 showasaction里面的值，如果是never 则肯定不会显示，如果瞎写，把always和never写一起会报错的。
+
+扩展性太差
+
+sherlockActionBar 原名   Toolbar
+
+Toolbar 是android 5.0的推出的，放在了v7包中作为控件
+，它是为了取代actionbar而产生的，意味着官方在某些程度上认为 ActionBar 
+限制了 android app 的开发与设计的弹性，
+
+ material design 也对之做了名称的定义：App bar
+ 
+ 
+   Toolbar元素
+  ● 导航按钮
+  ● 应用的Logo
+  ● 标题和子标题
+  ● 若干个自定义View
+  ● 动作菜单
+
+
+
+
+第一步  引入v7包
+第二步   修改Them主题  如果不修改，则会报异常 android:theme="@style/Theme.AppCompat.NoActionBar"
+异常 This Activity already has an action bar supplied by the window decor
+第三步 在布局中写入ToolBar
+第三步  把Activity替换成AppCampactActivity	 
+第四步   替换ToolBar
+
+
+showasaction
+
+  1. item的icon和title属性顾名思义，而app:showAsAction属性则是用来指定这个动作是放置在操作栏上，还是溢出菜单中。当它的值设置为”ifRomom”时，如果操作栏有空间放置，则放置在操作栏上，否则放置到溢出菜单中。当它的值设置为”always”，这个动作将总是放置在操作栏上。当它的值设置为”never”，这个动作将总是放置在溢出菜单中。
+
+
+
+Action Bar是一种新増的导航栏功能，在android 3.0之后加入到系统的API当中，它标识了用户当前操作界面的位置，并提供了额外的用户动作、界面导航等功能。使用ActionBar的好处是，它可以给提供一种全局统一的UI界面，使得用户在使用任何一款软件时都懂得该如何操作，并且ActionBar还可以自动适应各种不同大小的屏幕。
+为了让安卓应用的界面更加统一同时降低用户的学习成本以及避免安卓用户在使用中逻辑混乱。
+下面是一张使用ActionBar的界面截图：
+
+其中，[1]是ActionBar的图标，[2]是两个action按钮，[3]是overflow按钮。
+问题二：3  overflow无法显示
+对初学者来说又是一个比较抓狂的问题。抓破头都很难想出一个所以然来。
+后来网上找资料才发现原来是跟手机硬件有关。如果你手机已经有物理menu键，overflow就不会显示。如果要显示就只能通过代码控制了。
+用起来比较费劲  各种坑 比如 showasaction里面的值，如果是never 则肯定不会显示，如果瞎写，把always和never写一起会报错的。
+扩展性太差
+大多数人用民间的ToolBar  叫做sherlockActionBar
+Toolbar 是android 5.0的推出的，放在
+
+了v7包中作为控件，它是为了取代actionbar而产生的，意味着官方在某些程度上认为 ActionBar 限制了 android app 的开发与设计的弹性，而在 material design 也对之做了名称的定义：App bar
+
+导航控件  显示标题  导航back   快捷操作  菜单   而且toolbar不一定要放在顶部
+
+
+Toolbar元素
+  ● 导航按钮
+  ● 应用的Logo
+  ● 标题和子标题
+  ● 若干个自定义View
+  ● 动作菜单
+第一步  引入v7包
+第二步   修改Them主题  如果不修改，则会报异常 android:theme="@style/Theme.AppCompat.NoActionBar"
+异常 This Activity already has an action bar supplied by the window decor
+第三步 在布局中写入ToolBar
+第三步  把Activity替换成AppCampactActivity	 
+第四步  
+
+
+  1. item的icon和title属性顾名思义，而app:showAsAction属性则是用来指定这个动作是放置在操作栏上，还是溢出菜单中。当它的值设置为”ifRomom”时，如果操作栏有空间放置，则放置在操作栏上，否则放置到溢出菜单中。当它的值设置为”always”，这个动作将总是放置在操作栏上。当它的值设置为”never”，这个动作将总是放置在溢出菜单中。
+
+
+app:showAsAction若为ifRoom则，作为app bar的按钮，若为never则为overflow menu中的选项，若app bar中的空间不足，则会将超出的部分全部放入overflow menu中
+
+
+设置ToolBar 颜色
+<item name="colorPrimary">#2e8abb</item> <!--浅蓝色-->
+设置状态蓝颜色
+<item name="colorPrimaryDark">#3A5FCD</item> <!--深蓝色-->
+设置副标题字体颜色
+<item name="android:textColorSecondary">#00FFFF</item>
+
+ToolBar  API
+collapseActionView()
+折叠当前展开了行动视图。
+
+showOverflowMenu()
+从显示相关的菜单溢出项目。
+
+dismissPopupMenus()
+关闭所有当前显示弹出式菜单，包括溢出或子菜单。
+
+isOverflowMenuShowing()
+检查溢出菜单是否正在显示。
+
+inflateMenu(int resId)
+膨胀的菜单资源到这个工具栏。
+
+hideOverflowMenu()
+隐藏关联菜单溢出项目。
+
+
+setContentInsetEndWithActions(int insetEndWithActions)
+设置开始的内容插入时操作按钮都存在使用。
+
+
+setContentInsetStartWithNavigation(int insetStartWithNavigation)
+设置启动内容插入时，导航按钮存在使用。
+
+
+setContentInsetsRelative(int contentInsetStart, int contentInsetEnd)
+设置此相对布局方向工具栏的内容插图。
+
+setLogo(Drawable drawable)
+设置一个Log图片。
+
+setLogoDescription(int resId)
+设置Log的说明。
+
+setNavigationContentDescription(CharSequence description)
+如果存在设置导航按钮的内容。
+
+setNavigationOnClickListener(View.OnClickListener listener)
+设置一个侦听器来导航事件
+
+setOverflowIcon(Drawable icon)
+设置图标使用的溢出按钮。
+
+setSubtitle(CharSequence subtitle)
+设置此工具栏的字幕。
+
+setSubtitleTextAppearance(Context context, int resId)
+设置文本颜色，大小，样式，颜色提示，并突出显示颜色从指定TextAppearance资源。
+
+setTitleMargin(int start, int top, int end, int bottom)
+设置标题边距。
+
+setTitleTextAppearance(Context context, int resId)
+设置文本颜色，大小，样式，颜色提示，并突出显示颜色从指定TextAppearance资源。
+
+setTitleTextColor(int color)
+设置标题的文本颜色，如果存在的话
+
+---------------------------SearchView-----------------------------------------------------
+
+
+
+
+setImeOptions(int)	 设置输入法搜索选项字段，默认是搜索，可以是：下一页、发送、完成等
+
+android:inputType  设置输入类型 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
